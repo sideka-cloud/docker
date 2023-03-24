@@ -107,5 +107,3 @@ Below is a list of environment variables that you might need to change based on 
 
 
 ---
-#### Todo List
-* Cache purge mechanism
