@@ -38,7 +38,7 @@ docker service ls
 docker service logs -f my_wordpress_nginx
 ```
 
-If that's the first time you're running it, it'll take a couple of minutes to fetch the docker images and initialize the database. When all the containers are running, open `yourdomain.com` in your browser and proceed with the wordpress installation.
+If that's the first time you're running it, it'll take a couple of minutes to fetch the docker images and initialize the database. When all the containers are running, open `https://yourdomain.com` in your browser and proceed with the wordpress installation. And `http://yourdomain.com:8080` for web dashboard traefik.
 
 ### Scaling
 You can scale the `wordpress` and `nginx` part very easily:
