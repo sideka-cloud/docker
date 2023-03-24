@@ -69,7 +69,9 @@ You need to set Cloudflare API Token using `"CF_DNS_API_TOKEN"` env in `docker-s
 Change CF_DNS_API_TOKEN: b7x1MCiBUCkoj-ftODl2pvnSD3z4L8uFWhJZzVmL with your own CF_DNS_API_TOKEN
 
 ##### Production vs Staging Certificate
-The certbot configuration is set to issue an staging certificate by default. If you want to get a production certificate, you need to comment below line in `docker-stack.yml`:
+The certbot configuration is set to issue an staging certificate by default. 
+Production can get certificate from Letsencrypt and Staging can get certificate from self-sign traefik 1y.
+If you want to get a production certificate, you need to comment below line in `docker-stack.yml`:
 
 ```bash
 - "--certificatesResolvers.myCloudflare.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
