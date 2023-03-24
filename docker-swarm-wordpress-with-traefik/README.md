@@ -18,7 +18,7 @@ Make sure you have a docker swarm cluster running. Then follow below commands:
 git clone https://github.com/sideka-cloud/docker.git
 cd docker/docker-swarm-wordpress-with-traefik
 
-# Change 'example.com' to your own domain name
+# Change domain 'sys-ops.hore.host' to your own domain name
 sed -i -e 's/sys-ops.hore.host/yourdomain.com/g' ./docker-stack.yml
 
 # Change default credentials in docker-stack.yml file
