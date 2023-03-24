@@ -16,7 +16,7 @@ Make sure you have a docker swarm cluster running. Then follow below commands:
 ```bash
 # Clode the git repo
 git clone https://github.com/sideka-cloud/docker.git
-cd docker-swarm-wordpress
+cd docker/docker-swarm-wordpress-with-traefik
 
 # Change 'example.com' to your own domain name
 sed -i -e 's/example.com/yourdomain.com/g' ./docker-stack.yml
@@ -24,7 +24,7 @@ sed -i -e 's/example.com/yourdomain.com/g' ./docker-stack.yml
 # Change default credentials in docker-stack.yml file
 
 # Create required directories to persist data
-mkdir -p /data/{wp,mysql,letsencrypt}_data
+mkdir -p /home/data/{wp,mysql,letsencrypt}_data
 
 # Create docker networks
 docker network create --driver overlay --scope swarm nw-web
