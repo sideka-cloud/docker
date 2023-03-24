@@ -2,10 +2,10 @@
 
 A simple swarm stack to deploy wordpress in a docker swarm cluster. It uses below tools and docker images to deploy a wordpress setup.
 
-* Wordpress
-* Nginx
-* MySQL
-* Traefik
+* Wordpress 6 php8.1-fpm
+* Nginx 1.22
+* MariaDB 10.10
+* Traefik 2.9
 * Certbot
 
 
