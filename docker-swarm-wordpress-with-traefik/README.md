@@ -1,6 +1,6 @@
 ## Docker Swarm Stack for Wordpress
 
-[![automated](https://img.shields.io/docker/cloud/automated/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/iiriix/nginx-wp) [![build](https://img.shields.io/docker/cloud/build/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/iiriix/nginx-wp/builds) [![pulls](https://img.shields.io/docker/pulls/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/iiriix/nginx-wp) [![version](https://img.shields.io/docker/v/iiriix/nginx-wp?label=nginx%20version&style=flat-square)](apps/nginx/Dockerfile)
+[![automated](https://img.shields.io/docker/cloud/automated/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/iiriix/nginx-wp) [![build](https://img.shields.io/docker/cloud/build/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/iiriix/nginx-wp/builds) [![pulls](https://img.shields.io/docker/pulls/iiriix/nginx-wp?style=flat-square)](https://hub.docker.com/r/sysopsid/nginx) [![version](https://img.shields.io/docker/v/iiriix/nginx-wp?label=nginx%20version&style=flat-square)](apps/nginx/Dockerfile)
 
 A simple swarm stack to deploy wordpress in a docker swarm cluster. It uses below tools and docker images to deploy a wordpress setup.
 
@@ -17,7 +17,7 @@ Make sure you have a docker swarm cluster running. Then follow below commands:
 
 ```bash
 # Clode the git repo
-git clone https://github.com/iiriix/docker-swarm-wordpress
+git clone https://github.com/sideka-cloud/docker.git
 cd docker-swarm-wordpress
 
 # Change 'example.com' to your own domain name
