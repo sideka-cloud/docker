@@ -19,7 +19,7 @@ git clone https://github.com/sideka-cloud/docker.git
 cd docker/docker-swarm-wordpress-with-traefik
 
 # Change 'example.com' to your own domain name
-sed -i -e 's/example.com/yourdomain.com/g' ./docker-stack.yml
+sed -i -e 's/sys-ops.hore.host/yourdomain.com/g' ./docker-stack.yml
 
 # Change default credentials in docker-stack.yml file
 
@@ -66,6 +66,7 @@ The `traefik` service is configured to use `Certbot (Letsencrypt)` to generate a
 
 ##### Cloudflare Provider
 You need to set Cloudflare API Token using `"CF_DNS_API_TOKEN"` env in `docker-stack.yml` file in order to pass the dns challenge and get a valid certificate.
+Change CF_DNS_API_TOKEN: b7x1MCiBUCkoj-ftODl2pvnSD3z4L8uFWhJZzVmL with your own CF_DNS_API_TOKEN
 
 ##### Production vs Staging Certificate
 The certbot configuration is set to issue an staging certificate by default. If you want to get a production certificate, you need to comment below line in `docker-stack.yml`:
