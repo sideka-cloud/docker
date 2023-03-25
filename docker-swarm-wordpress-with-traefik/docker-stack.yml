@@ -54,7 +54,6 @@ services:
 
   nginx:
     image: sysopsid/nginx:1.22-alpine
-#    image: iiriix/nginx-wp:latest
     deploy:
       replicas: 1
       update_config:
