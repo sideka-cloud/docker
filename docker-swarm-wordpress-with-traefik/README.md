@@ -24,7 +24,7 @@ sed -i -e 's/sys-ops.hore.host/yourdomain.com/g' ./docker-stack.yml
 # Change default credentials in docker-stack.yml file
 
 # Create required directories to persist data
-mkdir -p /home/data/{wp,mysql,letsencrypt}_data
+mkdir -p /data/{wp,mysql,letsencrypt}_data
 
 # Create docker networks
 docker network create --driver overlay --scope swarm nw-web
