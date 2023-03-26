@@ -1,0 +1,180 @@
+version: "3.7"
+
+services:
+  maxscale:
+    image: sysopsid/mariadb-maxscale:latest
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=false"
+    environment:
+        DB_SERVICE_NAME: dbcluster
+        ENABLE_ROOT_USER: 1
+    networks:
+      - net-db
+      - nw-backend
+
+  wordpress:
+    image: wordpress:6-php8.1-fpm-alpine
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 10
+        window: 15s
+      labels:
+        - "traefik.enable=false"
+    environment:
+        WORDPRESS_DB_HOST: maxscale
+        WORDPRESS_DB_USER: wordpress
+        WORDPRESS_DB_PASSWORD: wordpress
+        WORDPRESS_DB_NAME: wordpress
+        WORDPRESS_TABLE_PREFIX: wp_
+        WORDPRESS_DEBUG: 1
+    depends_on:
+      - maxscale
+    volumes:
+      - wp_data:/var/www/html
+      - ./apps/wordpress/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - nw-backend
+
+  nginx:
+    image: sysopsid/nginx:1.22-alpine
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 10
+        window: 15s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=nw-web"
+        - "traefik.http.services.myrouter-01.loadbalancer.server.port=80"
+        ### Middlewares
+        # https-redir
+        - "traefik.http.middlewares.https-redir.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.https-redir.redirectscheme.permanent=true"
+        # www-redir
+        - "traefik.http.middlewares.www-redir.redirectregex.regex=^https://www.(.*)"
+        - "traefik.http.middlewares.www-redir.redirectregex.replacement=https://$${1}"
+        - "traefik.http.middlewares.www-redir.redirectregex.permanent=true"
+        ### Entrypoints
+        # web
+        - "traefik.http.routers.myrouter-01.rule=Host(`sys-ops.hore.host`, `www.sys-ops.hore.host`)"
+        - "traefik.http.routers.myrouter-01.entrypoints=web"
+        - "traefik.http.routers.myrouter-01.middlewares=https-redir@docker"
+        # websecure
+        - "traefik.http.routers.myrouter-02.rule=Host(`sys-ops.hore.host`, `www.sys-ops.hore.host`)"
+        - "traefik.http.routers.myrouter-02.entrypoints=websecure"
+        - "traefik.http.routers.myrouter-02.middlewares=www-redir@docker"
+        - "traefik.http.routers.myrouter-02.tls=true"
+        - "traefik.http.routers.myrouter-02.tls.certresolver=myCloudflare"
+        - "traefik.http.routers.myrouter-02.tls.domains[0].main=sys-ops.hore.host"
+        - "traefik.http.routers.myrouter-02.tls.domains[0].sans=*.sys-ops.hore.host"
+    depends_on:
+      - wordpress
+    volumes:
+      - ./apps/nginx/nginx_conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./apps/nginx/nginx_conf/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - wp_data:/var/www/html
+    networks:
+      - nw-backend
+      - nw-web
+
+  traefik:
+    image: traefik:2.9
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 10s
+        max_attempts: 10
+        window: 15s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.traefik-gui.loadbalancer.server.port=8080"
+        - "traefik.http.routers.traefik-gui.rule=Host(`traefik.sys-ops.hore.host`)"
+        - "traefik.http.routers.traefik-gui.entrypoints=websecure"
+        - "traefik.http.routers.traefik-gui.service=api@internal"
+        - "traefik.http.routers.traefik-gui.middlewares=traefik-gui-auth"
+        - "traefik.http.middlewares.traefik-gui-auth.basicauth.realm=MyPrivateRealm"
+        - "traefik.http.middlewares.traefik-gui-auth.basicauth.users=admin:$$apr1$$QsWBfEvl$$kY0SCysYUjo4qQSnKGh8s." # user:admin, pass:admin
+      placement:
+        constraints:
+          - node.role == manager
+    command:
+      - "--log=true"
+      - "--log.level=warn" # PANIC, FATAL, ERROR, WARN, INFO, DEBUG
+      # - "--accesslog=true"
+      - "--api.insecure=true"
+      # - "--api.debug=true"
+      - "--providers.docker=true"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      ## Certificate Resolver: cloudflare, type=dnsChallenge
+      - "--certificatesResolvers.myCloudflare.acme.email=postmaster@sys-ops.hore.host"
+      - "--certificatesResolvers.myCloudflare.acme.storage=/data/acme.json"
+      #- "--certificatesResolvers.myCloudflare.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # Staging. Comment this for Production.
+      - "--certificatesResolvers.myCloudflare.acme.dnsChallenge=true"
+      - "--certificatesResolvers.myCloudflare.acme.dnsChallenge.provider=cloudflare"
+      - "--certificatesResolvers.myCloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+    environment:
+      CF_DNS_API_TOKEN: b7x1MCiBUCkoj-ftODl2pvnSD3z4L8uFWhJZzVmL
+    ports:
+      - published: 80
+        target: 80
+        protocol: tcp
+        mode: host
+      - published: 443
+        target: 443
+        protocol: tcp
+        mode: host
+      - published: 8080
+        target: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt_data:/data
+    networks:
+      - nw-web
+
+volumes:
+  wp_data:
+    driver: local
+    driver_opts:
+       o: bind
+       type: none
+       device: /data/wp_data
+  letsencrypt_data:
+    driver: local
+    driver_opts:
+       o: bind
+       type: none
+       device: /data/letsencrypt_data
+
+networks:
+  nw-web:
+    external: true
+  nw-backend:
+    external: true
+  net-db:
+    external: true
